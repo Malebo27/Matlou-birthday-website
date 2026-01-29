@@ -60,12 +60,12 @@ const giftBtn = document.getElementById("gift-btn");
 const giftModal = document.getElementById("gift-modal");
 const giftClose = document.getElementById("gift-close");
 
-const giftAudio = document.getElementById("gift-audio");
 const bgMusic = document.getElementById("bg-music");
+const giftAudio = document.getElementById("gift-audio");
 
 let fadeInterval;
 
-/* ---------- GIFT MUSIC FADE ---------- */
+/* FADE IN GIFT MUSIC */
 function fadeInAudio(audio, targetVolume = 0.4) {
   clearInterval(fadeInterval);
   audio.volume = 0;
@@ -81,6 +81,7 @@ function fadeInAudio(audio, targetVolume = 0.4) {
   }, 100);
 }
 
+/* FADE OUT GIFT MUSIC */
 function fadeOutAudio(audio) {
   clearInterval(fadeInterval);
 
@@ -95,27 +96,16 @@ function fadeOutAudio(audio) {
   }, 100);
 }
 
-/* ---------- SLOW DOWN MAIN MUSIC ---------- */
-function slowDownMainMusic() {
-  if (!bgMusic) return;
-
-  bgMusic.playbackRate = 0.7; // slower & dreamy
-  bgMusic.volume = 0.2;      // quieter
-}
-
-/* ---------- RESTORE MAIN MUSIC ---------- */
-function restoreMainMusic() {
-  if (!bgMusic) return;
-
-  bgMusic.playbackRate = 1;  // normal speed
-  bgMusic.volume = 0.5;      // original volume
-}
-
-/* ---------- OPEN GIFT ---------- */
+/* OPEN GIFT */
 giftBtn.addEventListener("click", () => {
   giftModal.style.display = "block";
 
-  slowDownMainMusic();
+  // stop main music 🎵
+  if (bgMusic && !bgMusic.paused) {
+    bgMusic.pause();
+  }
+
+  // play gift music 🎶
   fadeInAudio(giftAudio);
 
   // hearts 💕
@@ -124,7 +114,7 @@ giftBtn.addEventListener("click", () => {
   }
 });
 
-/* ---------- CLOSE GIFT ---------- */
+/* CLOSE GIFT */
 giftClose.addEventListener("click", closeGift);
 
 giftModal.addEventListener("click", (e) => {
@@ -136,6 +126,12 @@ giftModal.addEventListener("click", (e) => {
 function closeGift() {
   giftModal.style.display = "none";
 
+  // stop gift music
   fadeOutAudio(giftAudio);
-  restoreMainMusic();
+
+  // resume main music 🎵
+  if (bgMusic) {
+    bgMusic.play();
+  }
 }
+
