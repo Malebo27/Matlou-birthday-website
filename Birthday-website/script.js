@@ -102,3 +102,25 @@ function closeGift() {
   giftModal.style.display = "none";
   crossfadeBackToMain();
 }
+
+const floatingItems = ["🎈", "🥳", "💖", "🎉"];
+
+function createFloatingItem() {
+  const item = document.createElement("div");
+  item.classList.add("floating");
+
+  item.innerHTML = floatingItems[Math.floor(Math.random() * floatingItems.length)];
+
+  item.style.left = Math.random() * 100 + "vw";
+  item.style.fontSize = Math.random() * 20 + 20 + "px";
+  item.style.animationDuration = Math.random() * 4 + 6 + "s";
+
+  document.body.appendChild(item);
+
+  setTimeout(() => {
+    item.remove();
+  }, 9000);
+}
+
+/* create items every few seconds */
+setInterval(createFloatingItem, 800);
