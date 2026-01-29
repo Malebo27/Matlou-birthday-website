@@ -61,13 +61,44 @@ const giftModal = document.getElementById("gift-modal");
 const giftClose = document.getElementById("gift-close");
 const giftAudio = document.getElementById("gift-audio");
 
+let fadeInterval;
+
+/* FADE IN */
+function fadeInAudio(audio) {
+  clearInterval(fadeInterval);
+  audio.volume = 0;
+  audio.currentTime = 0;
+  audio.play();
+
+  fadeInterval = setInterval(() => {
+    if (audio.volume < 0.4) {
+      audio.volume = Math.min(audio.volume + 0.02, 0.4);
+    } else {
+      clearInterval(fadeInterval);
+    }
+  }, 100);
+}
+
+/* FADE OUT */
+function fadeOutAudio(audio) {
+  clearInterval(fadeInterval);
+
+  fadeInterval = setInterval(() => {
+    if (audio.volume > 0.02) {
+      audio.volume -= 0.02;
+    } else {
+      audio.pause();
+      audio.volume = 0;
+      clearInterval(fadeInterval);
+    }
+  }, 100);
+}
+
+/* OPEN GIFT */
 giftBtn.addEventListener("click", () => {
   giftModal.style.display = "block";
 
-  // play gift music 🎵
-  giftAudio.currentTime = 0;
-  giftAudio.volume = 0.4;
-  giftAudio.play();
+  fadeInAudio(giftAudio);
 
   // hearts 💕
   for (let i = 0; i < 12; i++) {
@@ -75,6 +106,7 @@ giftBtn.addEventListener("click", () => {
   }
 });
 
+/* CLOSE GIFT */
 giftClose.addEventListener("click", closeGift);
 
 giftModal.addEventListener("click", (e) => {
@@ -85,5 +117,5 @@ giftModal.addEventListener("click", (e) => {
 
 function closeGift() {
   giftModal.style.display = "none";
-  giftAudio.pause();
+  fadeOutAudio(giftAudio);
 }
