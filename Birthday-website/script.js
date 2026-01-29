@@ -14,48 +14,6 @@ btn.addEventListener("click", () => {
   isPlaying = !isPlaying;
 });
 
-const images = document.querySelectorAll(".photo img");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightbox-img");
-const closeBtn = document.getElementById("close");
-
-images.forEach(img => {
-  img.addEventListener("click", () => {
-    lightbox.style.display = "flex";
-lightboxImg.src = img.src;
-
-// heart burst 💕
-for (let i = 0; i < 8; i++) {
-  setTimeout(createHeart, i * 120);
-}
-  });
-});
-
-closeBtn.addEventListener("click", () => {
-  lightbox.style.display = "none";
-});
-
-lightbox.addEventListener("click", (e) => {
-  if (e.target !== lightboxImg) {
-    lightbox.style.display = "none";
-  }
-});
-
-function createHeart() {
-  const heart = document.createElement("div");
-  heart.classList.add("heart");
-  heart.innerHTML = "❤️";
-
-  heart.style.left = Math.random() * window.innerWidth + "px";
-  heart.style.top = (window.innerHeight / 2) + "px";
-
-  document.body.appendChild(heart);
-
-  setTimeout(() => {
-    heart.remove();
-  }, 2000);
-}
-
 const giftBtn = document.getElementById("gift-btn");
 const giftModal = document.getElementById("gift-modal");
 const giftClose = document.getElementById("gift-close");
@@ -63,50 +21,67 @@ const giftClose = document.getElementById("gift-close");
 const bgMusic = document.getElementById("bg-music");
 const giftAudio = document.getElementById("gift-audio");
 
-let fadeInterval;
+let fadeTimer;
 
-/* FADE IN GIFT MUSIC */
-function fadeInAudio(audio, targetVolume = 0.4) {
-  clearInterval(fadeInterval);
-  audio.volume = 0;
-  audio.currentTime = 0;
-  audio.play();
+/* ---------- CROSSFADE FUNCTIONS ---------- */
+function crossfadeToGift() {
+  clearInterval(fadeTimer);
 
-  fadeInterval = setInterval(() => {
-    if (audio.volume < targetVolume) {
-      audio.volume = Math.min(audio.volume + 0.02, targetVolume);
+  giftAudio.volume = 0;
+  giftAudio.currentTime = 0;
+  giftAudio.play();
+
+  fadeTimer = setInterval(() => {
+    // fade OUT background
+    if (bgMusic.volume > 0.02) {
+      bgMusic.volume -= 0.02;
     } else {
-      clearInterval(fadeInterval);
+      bgMusic.pause();
+      bgMusic.volume = 0.5; // reset for later
+    }
+
+    // fade IN gift music
+    if (giftAudio.volume < 0.4) {
+      giftAudio.volume += 0.02;
+    }
+
+    if (giftAudio.volume >= 0.4 && bgMusic.paused) {
+      clearInterval(fadeTimer);
     }
   }, 100);
 }
 
-/* FADE OUT GIFT MUSIC */
-function fadeOutAudio(audio) {
-  clearInterval(fadeInterval);
+function crossfadeBackToMain() {
+  clearInterval(fadeTimer);
 
-  fadeInterval = setInterval(() => {
-    if (audio.volume > 0.02) {
-      audio.volume -= 0.02;
+  bgMusic.volume = 0;
+  bgMusic.play();
+
+  fadeTimer = setInterval(() => {
+    // fade OUT gift
+    if (giftAudio.volume > 0.02) {
+      giftAudio.volume -= 0.02;
     } else {
-      audio.pause();
-      audio.volume = 0;
-      clearInterval(fadeInterval);
+      giftAudio.pause();
+      giftAudio.volume = 0;
+    }
+
+    // fade IN background
+    if (bgMusic.volume < 0.5) {
+      bgMusic.volume += 0.02;
+    }
+
+    if (bgMusic.volume >= 0.5 && giftAudio.paused) {
+      clearInterval(fadeTimer);
     }
   }, 100);
 }
 
-/* OPEN GIFT */
+/* ---------- OPEN GIFT ---------- */
 giftBtn.addEventListener("click", () => {
   giftModal.style.display = "block";
 
-  // stop main music 🎵
-  if (bgMusic && !bgMusic.paused) {
-    bgMusic.pause();
-  }
-
-  // play gift music 🎶
-  fadeInAudio(giftAudio);
+  crossfadeToGift();
 
   // hearts 💕
   for (let i = 0; i < 12; i++) {
@@ -114,7 +89,7 @@ giftBtn.addEventListener("click", () => {
   }
 });
 
-/* CLOSE GIFT */
+/* ---------- CLOSE GIFT ---------- */
 giftClose.addEventListener("click", closeGift);
 
 giftModal.addEventListener("click", (e) => {
@@ -125,13 +100,5 @@ giftModal.addEventListener("click", (e) => {
 
 function closeGift() {
   giftModal.style.display = "none";
-
-  // stop gift music
-  fadeOutAudio(giftAudio);
-
-  // resume main music 🎵
-  if (bgMusic) {
-    bgMusic.play();
-  }
+  crossfadeBackToMain();
 }
-
