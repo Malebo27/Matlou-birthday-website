@@ -59,22 +59,31 @@ function createHeart() {
 const giftBtn = document.getElementById("gift-btn");
 const giftModal = document.getElementById("gift-modal");
 const giftClose = document.getElementById("gift-close");
+const giftAudio = document.getElementById("gift-audio");
 
 giftBtn.addEventListener("click", () => {
-  giftModal.style.display = "flex";
+  giftModal.style.display = "block";
 
-  // hearts when gift opens 💕
-  for (let i = 0; i < 10; i++) {
-    setTimeout(createHeart, i * 100);
+  // play gift music 🎵
+  giftAudio.currentTime = 0;
+  giftAudio.volume = 0.4;
+  giftAudio.play();
+
+  // hearts 💕
+  for (let i = 0; i < 12; i++) {
+    setTimeout(createHeart, i * 120);
   }
 });
 
-giftClose.addEventListener("click", () => {
-  giftModal.style.display = "none";
-});
+giftClose.addEventListener("click", closeGift);
 
 giftModal.addEventListener("click", (e) => {
   if (e.target === giftModal) {
-    giftModal.style.display = "none";
+    closeGift();
   }
 });
+
+function closeGift() {
+  giftModal.style.display = "none";
+  giftAudio.pause();
+}
